@@ -24,7 +24,7 @@ def mock_netbox_pdns() -> Generator[Mock, None, None]:
             nb_ns_id=1,
             pdns_url="https://pdns.example.com",
             pdns_token="test_pdns_token",
-            sync_crontab="* * * * *",
+            sync_crontab="*/15 * * * *",
             mqtt_enabled=False,  # Disable MQTT to avoid connection attempts
         )
 
@@ -39,7 +39,7 @@ def client(mock_netbox_pdns: Mock) -> TestClient:
     with patch("apscheduler.schedulers.background.BackgroundScheduler") as mock_scheduler:
         mock_scheduler_instance = Mock()
         mock_scheduler.return_value = mock_scheduler_instance
-        
+
         # Mock MQTT service to prevent connection attempts
         with patch("netbox_pdns.mqtt_service.MQTTService") as mqtt_mock:
             mqtt_instance = Mock()

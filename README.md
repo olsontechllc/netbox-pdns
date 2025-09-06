@@ -15,7 +15,7 @@ A high-performance, enterprise-grade connector that synchronizes DNS zones betwe
 - **🛡️ High Reliability**: Exponential backoff retries, graceful error handling, thread-safe operations  
 - **📊 Comprehensive Monitoring**: Health checks, detailed status endpoints, structured logging
 - **⚡ Performance**: Non-blocking startup, concurrent operations, 85% test coverage
-- **🐳 Production Ready**: Docker support, Kubernetes manifests, extensive documentation
+- **🐳 Production Ready**: Docker support, **UNDER DEVELOPEMENT 🚧** Kubernetes manifests, extensive documentation
 
 ## 🚀 Quick Start
 
@@ -31,7 +31,7 @@ docker run -d \
   -e NETBOX_PDNS_NB_NS_ID="1" \
   -e NETBOX_PDNS_PDNS_URL="https://pdns.example.com:8081" \
   -e NETBOX_PDNS_PDNS_TOKEN="your-pdns-token" \
-  netbox-pdns:latest
+  ghcr.io/olsontechllc/netbox-pdns:latest
 
 # Verify installation
 curl http://localhost:8000/health
@@ -141,6 +141,8 @@ services:
 
 ### Kubernetes
 
+**UNDER DEVELOPEMENT 🚧**
+
 ```bash
 helm repo add netbox-pdns https://charts.netbox-pdns.olsontech.io
 helm install netbox-pdns netbox-pdns/netbox-pdns
@@ -196,6 +198,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **[📚 Full Documentation](https://netbox-pdns.olsontech.io)** • 
 **[🚀 Quick Start](https://netbox-pdns.olsontech.io/quickstart/)** • 
-**[🐳 Docker Hub](https://hub.docker.com/r/olsontech/netbox-pdns)**
 
 </div>

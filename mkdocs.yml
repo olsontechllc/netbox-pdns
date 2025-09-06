@@ -108,7 +108,5 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/olsontechllc/netbox-pdns
-    - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/r/olsontech/netbox-pdns
 
 copyright: Copyright &copy; 2024 Netbox PowerDNS Contributors

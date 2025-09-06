@@ -23,7 +23,7 @@ Complete configuration reference for the Netbox PowerDNS Connector.
 | Setting | Type | Default | Description | Environment Variable |
 |---------|------|---------|-------------|---------------------|
 | `webhook_secret` | `string` | `None` | HMAC webhook signature secret | `NETBOX_PDNS_WEBHOOK_SECRET` |
-| `sync_crontab` | `string` | `* * * * *` | Periodic sync schedule | `NETBOX_PDNS_SYNC_CRONTAB` |
+| `sync_crontab` | `string` | `*/15 * * * *` | Periodic sync schedule | `NETBOX_PDNS_SYNC_CRONTAB` |
 | `log_level` | `string` | `INFO` | Logging level | `NETBOX_PDNS_LOG_LEVEL` |
 | `pdns_server_id` | `string` | `localhost` | PowerDNS server identifier | `NETBOX_PDNS_PDNS_SERVER_ID` |
 
@@ -110,14 +110,14 @@ The sync schedule uses standard cron format:
 # │ │ │ ┌───────────── month (1 - 12)
 # │ │ │ │ ┌───────────── day of the week (0 - 6)
 # │ │ │ │ │
-# * * * * *
+# */15 * * * *
 ```
 
 Examples:
 
 | Schedule | Cron Expression | Description |
 |----------|----------------|-------------|
-| Every minute | `* * * * *` | Default - testing only |
+| Every minute | `*/15 * * * *` | Default - testing only |
 | Every hour | `0 * * * *` | Hourly sync |
 | Every 6 hours | `0 */6 * * *` | Production recommended |
 | Daily at 2 AM | `0 2 * * *` | Low-traffic sync |
@@ -162,7 +162,7 @@ NETBOX_PDNS_MQTT_QOS=1
 For Docker deployments, use the same `.env` file:
 
 ```bash
-docker run --env-file .env -p 8000:8000 netbox-pdns:latest
+docker run --env-file .env -p 8000:8000 ghcr.io/olsontechllc/netbox-pdns:latest
 ```
 
 ## :heavy_check_mark: Configuration Validation

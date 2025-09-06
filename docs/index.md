@@ -31,10 +31,10 @@ A high-performance, enterprise-grade connector that synchronizes DNS zones betwe
 
 ```bash
 # Using Docker (recommended)
-docker pull netbox-pdns:latest
+docker pull ghcr.io/olsontechllc/netbox-pdns:latest
 
 # Or from source
-git clone https://github.com/your-org/netbox-pdns
+git clone https://github.com/olsontechllc/netbox-pdns
 cd netbox-pdns
 uv sync
 ```
@@ -55,7 +55,7 @@ export NETBOX_PDNS_PDNS_TOKEN="your-pdns-token"
 
 ```bash
 # Docker
-docker run -p 8000:8000 --env-file .env netbox-pdns:latest
+docker run -p 8000:8000 --env-file .env ghcr.io/olsontechllc/netbox-pdns:latest
 
 # From source
 uv run netbox-pdns
@@ -100,5 +100,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## :question: Support
 
 - **Documentation**: Full documentation available in this site
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/your-org/netbox-pdns/issues)
-- **Discussions**: Community support via [GitHub Discussions](https://github.com/your-org/netbox-pdns/discussions)
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/olsontechllc/netbox-pdns/issues)
+- **Discussions**: Community support via [GitHub Discussions](https://github.com/olsontechllc/netbox-pdns/discussions)

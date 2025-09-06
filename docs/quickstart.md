@@ -44,7 +44,7 @@ docker run -d \
   -e NETBOX_PDNS_PDNS_URL="$PDNS_URL" \
   -e NETBOX_PDNS_PDNS_TOKEN="$PDNS_TOKEN" \
   --restart unless-stopped \
-  netbox-pdns:latest
+  ghcr.io/olsontechllc/netbox-pdns:latest
 ```
 
 ### Step 3: Verify Installation
@@ -77,7 +77,7 @@ Create `docker-compose.yml`:
 version: '3.8'
 services:
   netbox-pdns:
-    image: netbox-pdns:latest
+    image: ghcr.io/olsontechllc/netbox-pdns:latest
     ports:
       - "8000:8000"
     environment:

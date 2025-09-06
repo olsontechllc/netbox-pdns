@@ -8,10 +8,10 @@ This guide covers different installation methods for the Netbox PowerDNS Connect
 
 ```bash
 # Pull the latest stable release
-docker pull netbox-pdns:latest
+docker pull ghcr.io/olsontechllc/netbox-pdns:latest
 
 # Or pull a specific version
-docker pull netbox-pdns:v1.0.0
+docker pull ghcr.io/olsontechllc/netbox-pdns:v1.0.0
 ```
 
 ### Docker Compose
@@ -22,7 +22,7 @@ Create a `docker-compose.yml` file:
 version: '3.8'
 services:
   netbox-pdns:
-    image: netbox-pdns:latest
+    image: ghcr.io/olsontechllc/netbox-pdns:latest
     ports:
       - "8000:8000"
     environment:
@@ -65,7 +65,7 @@ pip install netbox-pdns
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/netbox-pdns.git
+git clone https://github.com/olsontechllc/netbox-pdns.git
 cd netbox-pdns
 
 # Install dependencies

@@ -58,7 +58,7 @@ def test_settings_default_values() -> None:
     }
 
     settings = Settings(**minimal_settings)
-    assert settings.sync_crontab == "* * * * *"
+    assert settings.sync_crontab == "*/15 * * * *"
     assert settings.log_level == "INFO"
     assert settings.pdns_server_id == "localhost"
 

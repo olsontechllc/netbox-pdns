@@ -16,15 +16,14 @@ class TestMQTTZoneUpdate:
 
     def test_valid_zone_update(self) -> None:
         """Test creating a valid zone update"""
-        update_data = {
-            "zone": "example.com",
-            "serial": 2023010101,
-            "event": "update",
-            "timestamp": time.time(),
-            "nameserver_ids": [1, 2, 3],
-        }
-
-        update = MQTTZoneUpdate(**update_data)
+        timestamp = time.time()
+        update = MQTTZoneUpdate(
+            zone="example.com",
+            serial=2023010101,
+            event="update",
+            timestamp=timestamp,
+            nameserver_ids=[1, 2, 3],
+        )
         assert update.zone == "example.com"
         assert update.serial == 2023010101
         assert update.event == "update"
@@ -32,33 +31,30 @@ class TestMQTTZoneUpdate:
 
     def test_zone_update_without_nameserver_ids(self) -> None:
         """Test zone update without nameserver IDs (optional field)"""
-        update_data = {
-            "zone": "example.com",
-            "serial": 2023010101,
-            "event": "create",
-            "timestamp": time.time(),
-        }
-
-        update = MQTTZoneUpdate(**update_data)
+        timestamp = time.time()
+        update = MQTTZoneUpdate(
+            zone="example.com",
+            serial=2023010101,
+            event="create",
+            timestamp=timestamp,
+        )
         assert update.nameserver_ids is None
 
     def test_invalid_zone_update_missing_required_field(self) -> None:
         """Test zone update with missing required field"""
-        update_data = {
-            "zone": "example.com",
-            "serial": 2023010101,
-            # Missing 'event' field
-            "timestamp": time.time(),
-        }
-
+        timestamp = time.time()
+        
         with pytest.raises(PydanticValidationError):
-            MQTTZoneUpdate(**update_data)
+            # Missing 'event' field should raise validation error
+            MQTTZoneUpdate(
+                zone="example.com",
+                serial=2023010101,
+                timestamp=timestamp,
+            )  # type: ignore[call-arg]
 
     def test_validate_zone_name(self) -> None:
         """Test zone name validation"""
-        update = MQTTZoneUpdate(
-            zone="example.com", serial=1, event="create", timestamp=time.time()
-        )
+        update = MQTTZoneUpdate(zone="example.com", serial=1, event="create", timestamp=time.time())
 
         # Valid zone name should not raise
         update.validate_zone_name()
@@ -146,7 +142,9 @@ class TestMQTTService:
         with pytest.raises(MQTTConnectionError, match="Unsupported MQTT scheme"):
             service._parse_broker_url()
 
-    def test_start_disabled(self, disabled_mqtt_settings: Settings, mock_zone_handler: Mock) -> None:
+    def test_start_disabled(
+        self, disabled_mqtt_settings: Settings, mock_zone_handler: Mock
+    ) -> None:
         """Test starting MQTT service when disabled"""
         service = MQTTService(disabled_mqtt_settings, mock_zone_handler)
 
@@ -189,7 +187,7 @@ class TestMQTTService:
     ) -> None:
         """Test starting MQTT service with authentication"""
         mqtt_settings.mqtt_username = "testuser"
-        mqtt_settings.mqtt_password = "testpass"
+        mqtt_settings.mqtt_password = "testpass"  # noqa: S105
 
         mock_client = Mock()
         mock_client_class.return_value = mock_client
@@ -267,13 +265,13 @@ class TestMQTTService:
         service = MQTTService(mqtt_settings, mock_zone_handler)
 
         # Simulate connection after short delay
-        async def connect_after_delay():
+        async def connect_after_delay() -> None:
             await asyncio.sleep(0.1)
             service.connected = True
 
         asyncio.create_task(connect_after_delay())
 
-        result = await service.wait_for_connection(timeout=1.0)
+        result = await service.wait_for_connection(connection_timeout=1.0)
         assert result is True
 
     @pytest.mark.asyncio
@@ -284,7 +282,7 @@ class TestMQTTService:
         service = MQTTService(mqtt_settings, mock_zone_handler)
         # Don't set connected = True
 
-        result = await service.wait_for_connection(timeout=0.1)
+        result = await service.wait_for_connection(connection_timeout=0.1)
         assert result is False
 
     def test_get_status(self, mqtt_settings: Settings, mock_zone_handler: Mock) -> None:
@@ -339,13 +337,15 @@ class TestMQTTService:
         # Create mock message
         mock_message = Mock()
         mock_message.topic = "test/zones/example.com/update"
-        mock_message.payload.decode.return_value = json.dumps({
-            "zone": "example.com",
-            "serial": 2023010101,
-            "event": "update",
-            "timestamp": time.time(),
-            "nameserver_ids": [1, 2],
-        })
+        mock_message.payload.decode.return_value = json.dumps(
+            {
+                "zone": "example.com",
+                "serial": 2023010101,
+                "event": "update",
+                "timestamp": time.time(),
+                "nameserver_ids": [1, 2],
+            }
+        )
 
         service._on_message(Mock(), None, mock_message)
 
@@ -356,7 +356,9 @@ class TestMQTTService:
         assert called_update.zone == "example.com"
         assert called_update.event == "update"
 
-    def test_on_message_invalid_topic(self, mqtt_settings: Settings, mock_zone_handler: Mock) -> None:
+    def test_on_message_invalid_topic(
+        self, mqtt_settings: Settings, mock_zone_handler: Mock
+    ) -> None:
         """Test processing message with invalid topic"""
         service = MQTTService(mqtt_settings, mock_zone_handler)
 
@@ -369,7 +371,9 @@ class TestMQTTService:
         # Handler should not be called
         mock_zone_handler.assert_not_called()
 
-    def test_on_message_invalid_json(self, mqtt_settings: Settings, mock_zone_handler: Mock) -> None:
+    def test_on_message_invalid_json(
+        self, mqtt_settings: Settings, mock_zone_handler: Mock
+    ) -> None:
         """Test processing message with invalid JSON"""
         service = MQTTService(mqtt_settings, mock_zone_handler)
 
@@ -392,10 +396,12 @@ class TestMQTTService:
         # Create mock message with missing required fields
         mock_message = Mock()
         mock_message.topic = "test/zones/example.com/update"
-        mock_message.payload.decode.return_value = json.dumps({
-            "zone": "example.com",
-            # Missing 'serial', 'event', 'timestamp'
-        })
+        mock_message.payload.decode.return_value = json.dumps(
+            {
+                "zone": "example.com",
+                # Missing 'serial', 'event', 'timestamp'
+            }
+        )
 
         service._on_message(Mock(), None, mock_message)
 
@@ -411,12 +417,14 @@ class TestMQTTService:
         # Create mock message with mismatched zone names
         mock_message = Mock()
         mock_message.topic = "test/zones/example.com/update"
-        mock_message.payload.decode.return_value = json.dumps({
-            "zone": "different.com",  # Different from topic
-            "serial": 2023010101,
-            "event": "update",
-            "timestamp": time.time(),
-        })
+        mock_message.payload.decode.return_value = json.dumps(
+            {
+                "zone": "different.com",  # Different from topic
+                "serial": 2023010101,
+                "event": "update",
+                "timestamp": time.time(),
+            }
+        )
 
         service._on_message(Mock(), None, mock_message)
 
@@ -430,12 +438,14 @@ class TestMQTTService:
         # Create mock message with old timestamp (older than 5 minutes)
         mock_message = Mock()
         mock_message.topic = "test/zones/example.com/update"
-        mock_message.payload.decode.return_value = json.dumps({
-            "zone": "example.com",
-            "serial": 2023010101,
-            "event": "update",
-            "timestamp": time.time() - 400,  # 400 seconds ago
-        })
+        mock_message.payload.decode.return_value = json.dumps(
+            {
+                "zone": "example.com",
+                "serial": 2023010101,
+                "event": "update",
+                "timestamp": time.time() - 400,  # 400 seconds ago
+            }
+        )
 
         service._on_message(Mock(), None, mock_message)
 

@@ -31,15 +31,15 @@ def create_app() -> FastAPI:
     trigger = CronTrigger.from_crontab(api.config.sync_crontab)
     scheduler.add_job(api.full_sync, trigger)
     scheduler.start()
-    
+
     # Application state tracking
     app_state: dict[str, Any] = {
         "initial_sync_complete": False,
         "initial_sync_started": False,
         "initial_sync_error": None,
-        "startup_time": time.time()
+        "startup_time": time.time(),
     }
-    
+
     # Shared zone operation handlers (used by both MQTT and webhooks)
     def handle_zone_create(zone_name: str, source: str = "MQTT") -> None:
         """Handle zone creation"""
@@ -87,12 +87,12 @@ def create_app() -> FastAPI:
             app_state["initial_sync_error"] = error_msg
             api.logger.error(f"Initial sync failed: {e}", exc_info=True)
 
-    # MQTT zone update handler  
+    # MQTT zone update handler
     def handle_mqtt_zone_update(zone_update: MQTTZoneUpdate) -> None:
         """Handle MQTT zone update messages"""
         try:
             api.logger.info(f"MQTT: Received {zone_update.event} event for zone {zone_update.zone}")
-            
+
             if zone_update.event == "create":
                 handle_zone_create(zone_update.zone, "MQTT")
             elif zone_update.event == "update":
@@ -103,12 +103,12 @@ def create_app() -> FastAPI:
                 api.logger.warning(
                     f"MQTT: Unknown event type '{zone_update.event}' for zone {zone_update.zone}"
                 )
-                
+
         except Exception as e:
             api.logger.error(
                 f"MQTT: Error processing {zone_update.event} event for zone {zone_update.zone}: {e}"
             )
-    
+
     # Initialize MQTT service
     mqtt_service = MQTTService(api.config, handle_mqtt_zone_update)
 
@@ -119,19 +119,19 @@ def create_app() -> FastAPI:
             api.logger.info("Starting MQTT service")
             mqtt_service.start()
             # Wait for MQTT connection (with timeout)
-            connected = await mqtt_service.wait_for_connection(timeout=10.0)
+            connected = await mqtt_service.wait_for_connection(connection_timeout=10.0)
             if connected:
                 api.logger.info("MQTT service connected successfully")
             else:
                 api.logger.warning("MQTT service failed to connect within timeout")
-        
+
         # Start initial sync in background thread (non-blocking)
         sync_thread = threading.Thread(target=run_initial_sync_background, daemon=True)
         sync_thread.start()
         api.logger.info("Initial sync started in background")
-        
+
         yield
-        
+
         # Shutdown services
         scheduler.shutdown()
         if api.config.mqtt_enabled:
@@ -144,13 +144,9 @@ def create_app() -> FastAPI:
             return False
         try:
             # Remove 'sha256=' prefix if present
-            if signature.startswith('sha256='):
+            if signature.startswith("sha256="):
                 signature = signature[7:]
-            expected_signature = hmac.new(
-                secret.encode(), 
-                payload, 
-                hashlib.sha256
-            ).hexdigest()
+            expected_signature = hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
             return secrets.compare_digest(expected_signature, signature)
         except Exception:
             return False
@@ -173,31 +169,29 @@ def create_app() -> FastAPI:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate API key"
             )
-        
+
         # Get raw body for both signature verification and parsing
         body = await request.body()
-        
+
         # If webhook secret is configured, verify HMAC signature
         if api.config.webhook_secret:
-            signature = (
-                request.headers.get("x-hub-signature-256") or 
-                request.headers.get("x-signature-256")
+            signature = request.headers.get("x-hub-signature-256") or request.headers.get(
+                "x-signature-256"
             )
             if not signature:
                 raise HTTPException(
-                    status_code=HTTP_401_UNAUTHORIZED, 
-                    detail="HMAC signature required when webhook secret is configured"
+                    status_code=HTTP_401_UNAUTHORIZED,
+                    detail="HMAC signature required when webhook secret is configured",
                 )
-            
+
             if not verify_webhook_signature(body, signature, api.config.webhook_secret):
                 raise HTTPException(
-                    status_code=HTTP_401_UNAUTHORIZED, 
-                    detail="Invalid webhook signature"
+                    status_code=HTTP_401_UNAUTHORIZED, detail="Invalid webhook signature"
                 )
-        
+
         # Parse JSON body into NetboxWebhook model
         try:
-            data_dict = json.loads(body.decode('utf-8'))
+            data_dict = json.loads(body.decode("utf-8"))
             webhook_data = NetboxWebhook(**data_dict)
             return webhook_data, api_key_value
         except json.JSONDecodeError as e:
@@ -209,10 +203,10 @@ def create_app() -> FastAPI:
 
     # Initialize rate limiter
     limiter = Limiter(key_func=get_remote_address)
-    
+
     app = FastAPI(lifespan=lifespan)
     app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
     app.add_middleware(SlowAPIMiddleware)
 
     @app.get("/health")
@@ -220,35 +214,32 @@ def create_app() -> FastAPI:
     async def health_check(request: Request) -> dict[str, Any]:
         """Basic health check endpoint"""
         return {"status": "Healthy"}
-    
-    @app.get("/status") 
+
+    @app.get("/status")
     @limiter.limit("30/minute")  # Reasonable rate for monitoring
     async def detailed_status(request: Request) -> dict[str, Any]:
         """Detailed application status including sync state"""
         startup_time = app_state["startup_time"]
         uptime = time.time() - (startup_time if isinstance(startup_time, int | float) else 0)
-        
+
         status_info = {
             "status": "Healthy",
             "uptime_seconds": round(uptime, 2),
             "initial_sync": {
                 "started": app_state["initial_sync_started"],
                 "completed": app_state["initial_sync_complete"],
-                "error": app_state["initial_sync_error"]
+                "error": app_state["initial_sync_error"],
             },
-            "scheduler": {
-                "running": scheduler.running,
-                "jobs_count": len(scheduler.get_jobs())
-            },
-            "mqtt": mqtt_service.get_status() if api.config.mqtt_enabled else {"enabled": False}
+            "scheduler": {"running": scheduler.running, "jobs_count": len(scheduler.get_jobs())},
+            "mqtt": mqtt_service.get_status() if api.config.mqtt_enabled else {"enabled": False},
         }
-        
+
         # Determine overall health
         if app_state["initial_sync_error"]:
             status_info["status"] = "Degraded"
         elif not app_state["initial_sync_complete"] and uptime > 300:  # 5 minutes
             status_info["status"] = "Warning"
-            
+
         return status_info
 
     @app.get("/mqtt/status")

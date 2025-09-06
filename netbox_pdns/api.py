@@ -19,7 +19,7 @@ from .exceptions import (
 )
 from .models import Settings
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class NetboxPDNS:
@@ -32,19 +32,19 @@ class NetboxPDNS:
         # Thread lock to prevent concurrent operations
         self._operation_lock = threading.Lock()
         self.logger.info(f"Netbox PowerDNS Connector intialized id: {id(self)}")
-    
+
     @contextmanager
     def _operation_lock_with_logging(self, operation_name: str) -> Generator[None, None, None]:
         """Context manager for operation lock with debug logging and timing"""
         self.logger.debug(f"Attempting to acquire lock for operation: {operation_name}")
         start_time = time.time()
-        
+
         # Try to acquire lock with timeout to detect contention
         acquired = self._operation_lock.acquire(timeout=30.0)
         if not acquired:
             self.logger.warning(f"Failed to acquire lock for {operation_name} within 30 seconds")
             raise TimeoutError(f"Lock timeout for operation: {operation_name}")
-        
+
         acquire_time = time.time() - start_time
         if acquire_time > 1.0:  # Log if we waited more than 1 second
             self.logger.warning(
@@ -52,7 +52,7 @@ class NetboxPDNS:
             )
         else:
             self.logger.debug(f"Lock acquired for {operation_name} (waited {acquire_time:.3f}s)")
-        
+
         try:
             yield
         finally:
@@ -63,42 +63,44 @@ class NetboxPDNS:
             )
 
     def retry_with_backoff(
-        self, 
-        func: Callable[..., T], 
-        *args: Any, 
+        self,
+        func: Callable[..., T],
+        *args: Any,
         max_attempts: int = 3,
         base_delay: float = 1.0,
         max_delay: float = 60.0,
         backoff_factor: float = 2.0,
         jitter: bool = True,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> T:
         """Execute function with exponential backoff retry logic"""
         last_exception = None
-        
+
         for attempt in range(max_attempts):
             try:
                 return func(*args, **kwargs)
             except Exception as e:
                 last_exception = e
-                
+
                 if attempt == max_attempts - 1:  # Last attempt
-                    self.logger.error(f"Function {func.__name__} failed after {max_attempts} attempts: {e}")
+                    self.logger.error(
+                        f"Function {func.__name__} failed after {max_attempts} attempts: {e}"
+                    )
                     raise e
-                
+
                 # Calculate delay with exponential backoff
-                delay = min(base_delay * (backoff_factor ** attempt), max_delay)
-                
+                delay = min(base_delay * (backoff_factor**attempt), max_delay)
+
                 # Add jitter to prevent thundering herd
                 if jitter:
-                    delay = delay * (0.5 + random.random() * 0.5)
-                
+                    delay = delay * (0.5 + random.random() * 0.5)  # noqa: S311
+
                 self.logger.warning(
                     f"Function {func.__name__} failed (attempt {attempt + 1}/{max_attempts}): {e}. "
                     f"Retrying in {delay:.2f}s"
                 )
                 time.sleep(delay)
-        
+
         # This should never be reached, but just in case
         raise last_exception or Exception("Retry failed")
 
@@ -133,20 +135,20 @@ class NetboxPDNS:
 
     def get_nb_zone(self, zone_id: int) -> pynetbox.core.response.Record:
         """Get a Netbox zone by ID.
-        
+
         Args:
             zone_id: The Netbox zone ID
-            
+
         Returns:
             The zone record
-            
+
         Raises:
             NetboxAPIError: If there's an error communicating with Netbox
             ZoneNotFoundError: If the zone is not found
         """
         if zone_id <= 0:
             raise ValueError("Zone ID must be positive")
-            
+
         try:
             zone = self.nb.plugins.netbox_dns.zones.get(id=zone_id)
             if zone is None:
@@ -159,19 +161,19 @@ class NetboxPDNS:
 
     def get_nb_zone_by_name(self, zone_name: str) -> pynetbox.core.response.Record | None:
         """Get a Netbox zone by name.
-        
+
         Args:
             zone_name: The DNS zone name to look up
-            
+
         Returns:
             The zone record if found, None otherwise
-            
+
         Raises:
             NetboxAPIError: If there's an error communicating with Netbox
         """
         if not zone_name or not zone_name.strip():
             return None
-            
+
         try:
             zones = self.nb.plugins.netbox_dns.zones.filter(name=zone_name.strip())
             # RecordSet is an iterator, get the first item by iterating
@@ -183,26 +185,26 @@ class NetboxPDNS:
 
     def get_pdns_zone(self, zone_id: str) -> pdns_auth_client.Zone:
         """Get a PowerDNS zone by ID.
-        
+
         Args:
             zone_id: The PowerDNS zone ID (usually the zone name)
-            
+
         Returns:
             The zone record
-            
+
         Raises:
             PowerDNSAPIError: If there's an error communicating with PowerDNS
             ZoneNotFoundError: If the zone is not found
         """
         if not zone_id or not zone_id.strip():
             raise ValueError("Zone ID cannot be empty")
-            
+
         def _get_pdns_zone() -> pdns_auth_client.Zone:
             zone = self.zones_api.list_zone(self.config.pdns_server_id, zone_id.strip())
             if zone is None:
                 raise ZoneNotFoundError(zone_id)
             return zone
-            
+
         try:
             return self.retry_with_backoff(_get_pdns_zone)
         except ZoneNotFoundError:
@@ -212,19 +214,19 @@ class NetboxPDNS:
 
     def get_nb_rrsets(self, zone_id: int) -> dict:
         """Get Netbox records for a zone, grouped by FQDN and record type.
-        
+
         Args:
             zone_id: The Netbox zone ID
-            
+
         Returns:
             Dictionary mapping (fqdn, record_type) tuples to lists of records
-            
+
         Raises:
             NetboxAPIError: If there's an error communicating with Netbox
         """
         if zone_id <= 0:
             raise ValueError("Zone ID must be positive")
-            
+
         try:
             nb_records = self.nb.plugins.netbox_dns.records.filter(zone_id=zone_id)
             nb_rrsets: dict = {}
@@ -329,7 +331,7 @@ class NetboxPDNS:
 
         def _create_pdns_zone() -> None:
             self.zones_api.create_zone(self.config.pdns_server_id, pdns_zone)
-            
+
         try:
             self.retry_with_backoff(_create_pdns_zone)
         except Exception as e:
@@ -349,7 +351,7 @@ class NetboxPDNS:
 
         def _delete_pdns_zone() -> None:
             self.zones_api.delete_zone(self.config.pdns_server_id, zone.to_text())
-            
+
         try:
             self.retry_with_backoff(_delete_pdns_zone)
         except Exception as e:
@@ -410,7 +412,7 @@ class NetboxPDNS:
                 pdns_zone.id if pdns_zone.id is not None else "",
                 pdns_zone_updated,
             )
-            
+
         try:
             self.retry_with_backoff(_patch_pdns_zone)
         except Exception as e:

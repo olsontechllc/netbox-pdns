@@ -496,13 +496,14 @@ def test_create_zone_exception_handling(netbox_pdns_instance: Mock) -> None:
                 with pytest.raises(PowerDNSAPIError):
                     netbox_pdns_instance.create_zone(mock_nb_zone)
 
-                # Verify the exception was logged (retry mechanism logs first, then original error handling)
+                # Verify the exception was logged (retry mechanism logs first,
+                # then original error handling)
                 assert netbox_pdns_instance.logger.error.call_count == 2
-                
+
                 # Check retry mechanism error
                 retry_error = netbox_pdns_instance.logger.error.call_args_list[0][0][0]
                 assert "failed after 3 attempts" in retry_error
-                
+
                 # Check original error handling
                 original_error = netbox_pdns_instance.logger.error.call_args_list[1][0][0]
                 assert "Failed to create zone example.com in PowerDNS" in original_error
