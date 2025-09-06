@@ -199,6 +199,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
 
 **[📚 Full Documentation](https://netbox-pdns.olsontech.io)** • 
-**[🚀 Quick Start](https://netbox-pdns.olsontech.io/quickstart/)** • 
+**[🚀 Quick Start](https://netbox-pdns.olsontech.io/quickstart/)**
 
 </div>
