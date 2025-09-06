@@ -8,7 +8,7 @@
 
 A high-performance, enterprise-grade connector that synchronizes DNS zones between [Netbox DNS](https://github.com/peteeckel/netbox-plugin-dns) and [PowerDNS Authoritative](https://www.powerdns.com/) servers.
 
-**Tested with Netbox v4.2.2, netbox-plugin-dns v1.2.7, and PowerDNS v4.9**
+**Tested with Netbox v4.2.2, netbox-plugin-dns v1.2.7, and PowerDNS v4.9.x**
 
 ## ✨ Features
 
@@ -17,7 +17,7 @@ A high-performance, enterprise-grade connector that synchronizes DNS zones betwe
 - **🛡️ High Reliability**: Exponential backoff retries, graceful error handling, thread-safe operations  
 - **📊 Comprehensive Monitoring**: Health checks, detailed status endpoints, structured logging
 - **⚡ Performance**: Non-blocking startup, concurrent operations, 85% test coverage
-- **🐳 Production Ready**: Docker support, **UNDER DEVELOPEMENT 🚧** Kubernetes manifests, extensive documentation
+- **🐳 Production Ready**: Docker support, **🚧 UNDER DEVELOPEMENT 🚧** Kubernetes manifests, extensive documentation
 
 ## 🚀 Quick Start
 
@@ -143,7 +143,7 @@ services:
 
 ### Kubernetes
 
-**UNDER DEVELOPEMENT 🚧**
+**🚧 UNDER DEVELOPEMENT 🚧**
 
 ```bash
 helm repo add netbox-pdns https://charts.netbox-pdns.olsontech.io
