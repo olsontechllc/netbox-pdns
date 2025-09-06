@@ -130,9 +130,9 @@ See the [Kubernetes Deployment Guide](deployment/kubernetes.md) for detailed man
 
 | Service | Version | Purpose |
 |---------|---------|---------|
-| Netbox | 3.0+ | DNS zone and record management |
-| Netbox DNS Plugin | 1.0+ | DNS-specific functionality |
-| PowerDNS Authoritative | 4.0+ | DNS server with API |
+| Netbox | 4.2.2+ | DNS zone and record management |
+| [Netbox DNS Plugin](https://github.com/peteeckel/netbox-plugin-dns) | 1.2.7+ | DNS-specific functionality |
+| PowerDNS Authoritative | 4.9.x | DNS server with API |
 
 #### Optional Services
 

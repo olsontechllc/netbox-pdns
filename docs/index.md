@@ -13,8 +13,8 @@ A high-performance, enterprise-grade connector that synchronizes DNS zones betwe
 
 ## :memo: Requirements
 
-- **Netbox**: Installation with Netbox DNS plugin
-- **PowerDNS**: Authoritative server with API enabled
+- **Netbox**: v4.2.2+ with [Netbox DNS plugin](https://github.com/peteeckel/netbox-plugin-dns) v1.2.7+
+- **PowerDNS**: Authoritative server v4.9.x with API enabled
 - **Authentication**: API tokens for both services
 - **Optional**: MQTT broker for real-time updates
 

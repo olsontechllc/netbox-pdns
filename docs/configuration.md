@@ -5,6 +5,18 @@ Complete configuration reference for the Netbox PowerDNS Connector.
 !!! info "Environment Variables"
     All configuration uses environment variables with the prefix `NETBOX_PDNS_`.
 
+## :bookmark_tabs: Compatibility
+
+| Component | Version | Status |
+|-----------|---------|--------|
+| Netbox | v4.2.2+ | ✅ Tested |
+| [Netbox DNS Plugin](https://github.com/peteeckel/netbox-plugin-dns) | v1.2.7+ | ✅ Tested |
+| PowerDNS Authoritative | v4.9.x | ✅ Tested |
+| Python | 3.11+ | ✅ Required |
+
+!!! warning "Version Compatibility"
+    This connector has been tested with Netbox v4.2.2, netbox-plugin-dns v1.2.7, and PowerDNS v4.9.x. While newer versions may work, they haven't been explicitly tested.
+
 ## :gear: Core Settings
 
 ### Required Configuration
@@ -12,7 +24,7 @@ Complete configuration reference for the Netbox PowerDNS Connector.
 | Setting | Type | Description | Environment Variable |
 |---------|------|-------------|---------------------|
 | `api_key` | `string` | Secret API key for webhook authentication | `NETBOX_PDNS_API_KEY` |
-| `nb_url` | `string` | Netbox installation URL with DNS plugin | `NETBOX_PDNS_NB_URL` |
+| `nb_url` | `string` | Netbox installation URL with [DNS plugin](https://github.com/peteeckel/netbox-plugin-dns) | `NETBOX_PDNS_NB_URL` |
 | `nb_token` | `string` | Netbox API token | `NETBOX_PDNS_NB_TOKEN` |
 | `nb_ns_id` | `integer` | Netbox nameserver object ID | `NETBOX_PDNS_NB_NS_ID` |
 | `pdns_url` | `string` | PowerDNS Authoritative Server API URL | `NETBOX_PDNS_PDNS_URL` |

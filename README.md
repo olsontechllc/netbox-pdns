@@ -8,6 +8,8 @@
 
 A high-performance, enterprise-grade connector that synchronizes DNS zones between [Netbox DNS](https://github.com/peteeckel/netbox-plugin-dns) and [PowerDNS Authoritative](https://www.powerdns.com/) servers.
 
+**Tested with Netbox v4.2.2, netbox-plugin-dns v1.2.7, and PowerDNS v4.9**
+
 ## ✨ Features
 
 - **🔄 Real-time Sync**: Webhook and MQTT-based zone synchronization
@@ -177,8 +179,8 @@ uv run pytest
 ## 📋 Requirements
 
 - **Python**: 3.11+
-- **Netbox**: 4.0+ with DNS plugin
-- **PowerDNS**: 4.0+ Authoritative server
+- **Netbox**: 4.2.2+ with [Netbox DNS plugin](https://github.com/peteeckel/netbox-plugin-dns) 1.2.7+
+- **PowerDNS**: 4.9.x Authoritative server
 - **Optional**: MQTT broker for real-time updates
 
 ## 📄 License

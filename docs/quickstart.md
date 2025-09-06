@@ -6,7 +6,7 @@ Get Netbox PowerDNS Connector running in under 5 minutes.
 
 Before starting, ensure you have:
 
-- [ ] **Netbox** installation with DNS plugin
+- [ ] **Netbox** v4.2.2+ with [Netbox DNS plugin](https://github.com/peteeckel/netbox-plugin-dns) v1.2.7+
 - [ ] **PowerDNS** Authoritative server with API enabled
 - [ ] **API tokens** for both services
 - [ ] **Docker** (recommended) or Python 3.11+
