@@ -43,7 +43,7 @@ class TestMQTTZoneUpdate:
     def test_invalid_zone_update_missing_required_field(self) -> None:
         """Test zone update with missing required field"""
         timestamp = time.time()
-        
+
         with pytest.raises(PydanticValidationError):
             # Missing 'event' field should raise validation error
             MQTTZoneUpdate(
