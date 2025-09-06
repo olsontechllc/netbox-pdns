@@ -3,8 +3,20 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'netbox_pdns/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'netbox_pdns/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/ci.yml'
 
 env:
   UV_CACHE_DIR: /tmp/.uv-cache

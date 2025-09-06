@@ -5,11 +5,25 @@ on:
     branches:
       - main
       - develop
+    paths:
+      - 'netbox_pdns/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/docker.yml'
     tags:
-      - 'v*'
+      - 'v*'  # Always build on tags regardless of path changes
   pull_request:
     branches:
       - main
+    paths:
+      - 'netbox_pdns/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/docker.yml'
 
 env:
   REGISTRY: ghcr.io
